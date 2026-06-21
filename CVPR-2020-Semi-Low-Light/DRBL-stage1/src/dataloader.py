@@ -6,6 +6,7 @@ import collections
 
 import torch
 import torch.multiprocessing as multiprocessing
+from torch import _utils
 
 from torch._C import _set_worker_signal_handlers, _update_worker_pids, \
     _remove_worker_pids, _error_if_any_worker_fails
@@ -71,7 +72,7 @@ class _MSDataLoaderIter(_DataLoaderIter):
                 multiprocessing.Queue() for _ in range(self.num_workers)
             ]
             self.worker_queue_idx = 0
-            self.worker_result_queue = multiprocessing.SimpleQueue()
+            # self.worker_result_queue = multiprocessing.SimpleQueue()
             self.batches_outstanding = 0
             self.worker_pids_set = False
             self.shutdown = False
@@ -103,12 +104,12 @@ class _MSDataLoaderIter(_DataLoaderIter):
                 else:
                     # do not initialize cuda context if not necessary
                     maybe_device_id = None
-                self.worker_manager_thread = threading.Thread(
-                    target=_worker_manager_loop,
-                    args=(self.worker_result_queue, self.data_queue, self.done_event, self.pin_memory,
-                          maybe_device_id))
-                self.worker_manager_thread.daemon = True
-                self.worker_manager_thread.start()
+                self.pin_memory_thread = threading.Thread(
+                target=_utils.pin_memory._pin_memory_loop,
+                args=(self.worker_result_queue, self.data_queue, self.done_event, self.pin_memory,
+                      maybe_device_id))
+                self.pin_memory_thread.daemon = True
+                self.pin_memory_thread.start()
             else:
                 self.data_queue = self.worker_result_queue
 
@@ -116,8 +117,8 @@ class _MSDataLoaderIter(_DataLoaderIter):
                 w.daemon = True  # ensure that the worker exits on process exit
                 w.start()
 
-            _update_worker_pids(id(self), tuple(w.pid for w in self.workers))
-            _set_SIGCHLD_handler()
+            _utils.signal_handling._set_worker_pids(id(self), tuple(w.pid for w in self.workers))
+            _utils.signal_handling._set_SIGCHLD_handler()
             self.worker_pids_set = True
 
             # prime the prefetch loop
