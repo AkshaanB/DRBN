@@ -44,7 +44,8 @@ def vgg_loss(vgg, img, gt):
     return mse(img_vgg[0], gt_vgg[0]) + 0.6*mse(img_vgg[1], gt_vgg[1]) + 0.4*mse(img_vgg[2], gt_vgg[2]) + 0.2*mse(img_vgg[3], gt_vgg[3])
 
 def vgg_init(vgg_loc):
-    vgg_model = torchvision.models.vgg16(pretrained = False).cuda()
+    _device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    vgg_model = torchvision.models.vgg16(pretrained = False).to(_device)
     vgg_model.load_state_dict(torch.load(vgg_loc))
     trainable(vgg_model, False)
 
@@ -146,9 +147,9 @@ class Trainer():
             phr, _, _, _ = self.recompose(input_step2, 3)
             phr_r, _, _, _ = self.recompose(input_step2_r, 3)
 
-            target_real = (torch.rand(self.args.batch_size*2, 1)*0.5 + 0.7).cuda()
-            target_fake = (torch.rand(self.args.batch_size, 1)*0.3).cuda()
-            ones_const = torch.ones(self.args.batch_size, 1).cuda()
+            target_real = (torch.rand(self.args.batch_size*2, 1)*0.5 + 0.7).to(lr.device)
+            target_fake = (torch.rand(self.args.batch_size, 1)*0.3).to(lr.device)
+            ones_const = torch.ones(self.args.batch_size, 1).to(lr.device)
 
             self.optimizer_dis.zero_grad()
 
@@ -271,7 +272,7 @@ class Trainer():
             self.ckp.save(self, epoch, is_best=(best[1][0] + 1 == epoch))
 
     def prepare(self, *args):
-        device = torch.device('cpu' if self.args.cpu else 'cuda')
+        device = torch.device('cpu' if self.args.cpu or not torch.cuda.is_available() else 'cuda')
         def _prepare(tensor):
             if self.args.precision == 'half': tensor = tensor.half()
             return tensor.to(device)

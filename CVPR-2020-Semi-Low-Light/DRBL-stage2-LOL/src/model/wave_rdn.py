@@ -53,7 +53,7 @@ def iwt_init(x):
     x3 = x[:, out_channel * 2:out_channel * 3, :, :] / 2
     x4 = x[:, out_channel * 3:out_channel * 4, :, :] / 2
     
-    h = torch.zeros([out_batch, out_channel, out_height, out_width]).float().cuda()
+    h = torch.zeros([out_batch, out_channel, out_height, out_width], dtype=x.dtype, device=x.device)
 
     h[:, :, 0::2, 0::2] = x1 - x2 - x3 + x4
     h[:, :, 1::2, 0::2] = x1 - x2 + x3 - x4
