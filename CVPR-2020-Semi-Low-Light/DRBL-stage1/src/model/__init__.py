@@ -16,7 +16,7 @@ class Model(nn.Module):
         self.chop = args.chop
         self.precision = args.precision
         self.cpu = args.cpu
-        self.device = torch.device('cpu' if args.cpu or not torch.cuda.is_available() else 'cuda')
+        self.device = torch.device('cpu' if args.cpu else 'cuda')
         self.n_GPUs = args.n_GPUs
         self.save_models = args.save_models
 

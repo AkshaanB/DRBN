@@ -33,8 +33,7 @@ class SRData(data.Dataset):
         self._set_filesystem(args.dir_data)
 
         if args.ext.find('img') < 0:
-            _cache_base = args.dir_cache if args.dir_cache else self.apath
-            path_bin = os.path.join(_cache_base, 'bin')
+            path_bin = os.path.join(self.apath, 'bin')
             os.makedirs(path_bin, exist_ok=True)
 
         list_hr, list_lr = self._scan()

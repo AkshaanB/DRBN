@@ -10,9 +10,10 @@ class LowLight(srdata.SRData):
 
     def _set_filesystem(self, dir_data):
         super(LowLight, self)._set_filesystem(dir_data)
-        self.apath = dir_data
-        self.dir_hr = os.path.join(self.apath, 'Our_normal')
-        self.dir_lr = os.path.join(self.apath, 'Our_low')
+        self.apath = '/data1/yangwenhan/datasets/'
+        print(self.apath)
+        self.dir_hr   = os.path.join(self.apath, 'Our_normal')
+        self.dir_lr   = os.path.join(self.apath, 'Our_low')
 
     def _scan(self):
         names_hr, names_lr = super(LowLight, self)._scan()

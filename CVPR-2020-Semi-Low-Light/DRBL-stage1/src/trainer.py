@@ -53,8 +53,7 @@ def vgg_loss(vgg, img, gt):
     return mse(img_vgg[0], gt_vgg[0]) + 0.6*mse(img_vgg[1], gt_vgg[1]) + 0.4*mse(img_vgg[2], gt_vgg[2]) + 0.2*mse(img_vgg[3], gt_vgg[3])
 
 def vgg_init(vgg_loc):
-    _device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    vgg_model = torchvision.models.vgg16(pretrained = False).to(_device)
+    vgg_model = torchvision.models.vgg16(pretrained = False).cuda()
     vgg_model.load_state_dict(torch.load(vgg_loc))
     trainable(vgg_model, False)
 
@@ -183,7 +182,7 @@ class Trainer():
                     hr = hr/255.0
 
                     [b, c, h, w] = hr.shape
-                    n_map = torch.zeros(b, c, h, w).to(lr.device)
+                    n_map = torch.zeros(b, c, h, w).cuda()
 
                     phr1, phr2, phr4 = self.model(lr, 3)
 
@@ -221,7 +220,7 @@ class Trainer():
             self.ckp.save(self, epoch, is_best=(best[1][0] + 1 == epoch))
 
     def prepare(self, *args):
-        device = torch.device('cpu' if self.args.cpu or not torch.cuda.is_available() else 'cuda')
+        device = torch.device('cpu' if self.args.cpu else 'cuda')
         def _prepare(tensor):
             if self.args.precision == 'half': tensor = tensor.half()
             return tensor.to(device)
