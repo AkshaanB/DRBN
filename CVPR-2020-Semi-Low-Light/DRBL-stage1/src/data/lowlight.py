@@ -10,7 +10,7 @@ class LowLight(srdata.SRData):
 
     def _set_filesystem(self, dir_data):
         super(LowLight, self)._set_filesystem(dir_data)
-        self.apath = '/data1/yangwenhan/datasets/'
+        self.apath = dir_data
         print(self.apath)
         self.dir_hr   = os.path.join(self.apath, 'Our_normal')
         self.dir_lr   = os.path.join(self.apath, 'Our_low')
