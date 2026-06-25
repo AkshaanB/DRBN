@@ -10,10 +10,10 @@ class LowLightTest(srdata.SRData):
 
     def _set_filesystem(self, dir_data):
         super(LowLightTest, self)._set_filesystem(dir_data)
-        self.apath = '/data1/yangwenhan/datasets/'
+        self.apath = dir_data
         print(self.apath)
-        self.dir_hr = os.path.join(self.apath, 'Our_normal_test')
-        self.dir_lr = os.path.join(self.apath, 'Our_low_test')
+        self.dir_hr = os.path.join(self.apath, 'Normal')
+        self.dir_lr = os.path.join(self.apath, 'Low')
 
     def _scan(self):
         names_hr, names_lr = super(LowLightTest, self)._scan()

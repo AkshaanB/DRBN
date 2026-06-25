@@ -170,7 +170,7 @@ class Trainer():
                 self.loader_test.dataset.set_scale(idx_scale)
                 tqdm_test = tqdm(self.loader_test, ncols=80)
 
-                for idx_img, (lr, hr, filename, _) in enumerate(tqdm_test):
+                for idx_img, (lr, hr, filename) in enumerate(tqdm_test):
                     filename = filename[0]
                     no_eval = (hr.nelement() == 1)
                     if not no_eval:
@@ -182,7 +182,7 @@ class Trainer():
                     hr = hr/255.0
 
                     [b, c, h, w] = hr.shape
-                    n_map = torch.zeros(b, c, h, w).cuda()
+                    n_map = torch.zeros(b, c, h, w)
 
                     phr1, phr2, phr4 = self.model(lr, 3)
 

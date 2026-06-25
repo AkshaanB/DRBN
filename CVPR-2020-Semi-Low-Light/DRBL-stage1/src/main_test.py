@@ -14,7 +14,7 @@ if checkpoint.ok:
     loader = data.Data(args)
 
     my_model = model.Model(args, checkpoint)
-    my_model.model.load_state_dict(torch.load('pretrain/model_s1.pt'))
+    my_model.model.load_state_dict(torch.load('pretrain/model_s1.pt', map_location='cpu'))
 
     args.n_colors = 3
 
