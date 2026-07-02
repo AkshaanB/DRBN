@@ -149,6 +149,29 @@ def calc_psnr(sr, hr, scale, rgb_range, benchmark=False):
 
     return -10 * math.log10(mse)
 
+def calc_ssim(sr, hr, scale, rgb_range, benchmark=False):
+    from skimage.metrics import structural_similarity as ssim_fn
+    if sr.dim() == 4:
+        sr, hr = sr[0], hr[0]
+    shave = scale if benchmark else scale + 6
+    sr_np = sr.data.clamp(0, rgb_range).permute(1, 2, 0).cpu().numpy()
+    hr_np = hr.data.clamp(0, rgb_range).permute(1, 2, 0).cpu().numpy()
+    sr_np = sr_np[shave:-shave, shave:-shave, :]
+    hr_np = hr_np[shave:-shave, shave:-shave, :]
+    return ssim_fn(sr_np, hr_np, channel_axis=-1, data_range=rgb_range)
+
+def calc_ssim_gc(sr, hr, scale, rgb_range, benchmark=False):
+    from skimage.metrics import structural_similarity as ssim_fn
+    if sr.dim() == 4:
+        sr, hr = sr[0], hr[0]
+    weights = sr.new_tensor([65.738, 129.057, 25.064]).view(3, 1, 1)
+    sr_y = sr.mul(weights).sum(dim=0).div(256)
+    hr_y = hr.mul(weights).sum(dim=0).div(256)
+    shave = scale if benchmark else scale + 6
+    sr_np = sr_y[shave:-shave, shave:-shave].cpu().numpy()
+    hr_np = hr_y[shave:-shave, shave:-shave].cpu().numpy()
+    return ssim_fn(sr_np, hr_np, data_range=rgb_range)
+
 def make_optimizer(args, my_model):
     trainable = filter(lambda x: x.requires_grad, my_model.parameters())
 
