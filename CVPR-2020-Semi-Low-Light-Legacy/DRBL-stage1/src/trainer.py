@@ -167,6 +167,8 @@ class Trainer():
         with torch.no_grad():
             for idx_scale, scale in enumerate(self.scale):
                 eval_acc = 0
+                eval_ssim = 0
+                eval_ssim_gc = 0
                 self.loader_test.dataset.set_scale(idx_scale)
                 tqdm_test = tqdm(self.loader_test, ncols=80)
 
@@ -193,23 +195,35 @@ class Trainer():
                     save_list = [hr, lr, phr, lr]
 
                     if not no_eval:
+                        bmark = self.loader_test.dataset.benchmark
                         eval_acc += utility.calc_psnr(
                             phr, hr, scale, self.args.rgb_range,
-                            benchmark=self.loader_test.dataset.benchmark
+                            benchmark=bmark
+                        )
+                        eval_ssim += utility.calc_ssim(
+                            phr, hr, scale, self.args.rgb_range,
+                            benchmark=bmark
+                        )
+                        eval_ssim_gc += utility.calc_ssim_gc(
+                            phr, hr, scale, self.args.rgb_range,
+                            benchmark=bmark
                         )
 
                     if self.args.save_results:
                         self.ckp.save_results(filename, save_list, scale, epoch)
 
-                self.ckp.log[-1, idx_scale] = eval_acc / len(self.loader_test)
+                n = len(self.loader_test)
+                self.ckp.log[-1, idx_scale] = eval_acc / n
                 best = self.ckp.log.max(0)
                 self.ckp.write_log(
-                    '[{} x{}]\tPSNR: {:.3f} (Best: {:.3f} @epoch {})'.format(
+                    '[{} x{}]\tPSNR: {:.3f} (Best: {:.3f} @epoch {})\tSSIM: {:.4f}\tSSIM-GC: {:.4f}'.format(
                         self.args.data_test,
                         scale,
                         self.ckp.log[-1, idx_scale],
                         best[0][idx_scale],
-                        best[1][idx_scale] + 1
+                        best[1][idx_scale] + 1,
+                        eval_ssim / n,
+                        eval_ssim_gc / n,
                     )
                 )
 
